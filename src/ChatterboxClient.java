@@ -2,7 +2,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -173,6 +176,7 @@ public class ChatterboxClient {
      * @param userInput stream to read user-typed data from
      * @param userOutput stream to print data to the user
      */
+    
     public ChatterboxClient(ChatterboxOptions options, InputStream userInput, OutputStream userOutput) {
         this.userInput = new Scanner(userInput, StandardCharsets.UTF_8);
         this.userOutput = userOutput;
@@ -184,6 +188,7 @@ public class ChatterboxClient {
         this.username = options.getUsername();
         this.password = options.getPassword();
     }
+    
 
     /**
      * Open a TCP connection to the server.
@@ -198,12 +203,35 @@ public class ChatterboxClient {
      *
      * @throws IOException if the socket cannot be opened
      */
+    
     public void connect() throws IOException {
-        throw new UnsupportedOperationException("Connect not yet implemented. Implement connect() and remove this exception!");
-
         // Make sure to have this.serverReader and this.serverWriter set by the end of this method!
         // hint: get the streams from the sockets, use those to create the InputStreamReader/OutputStreamWriter and the BufferedReader/BufferedWriter
+
+        // Creating a socket to connect to the server using the host and port
+        Socket socket = new Socket(this.host, this.port);
+
+        // receive raw bytes from server
+        InputStream inputStream = socket.getInputStream();
+
+        // send raw bytes to the server 
+        OutputStream outputStream = socket.getOutputStream();
+
+        // converts raw bytes to text
+        InputStreamReader inputStreamReader = new InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8);
+
+        // converts raw bytes to text before sending to socket
+        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
+
+        // lets you read whole lines 
+        // BufferedReader serverReader = new BufferedReader(inputStreamReader);
+        this.serverReader = new BufferedReader(inputStreamReader);
+
+        // BufferedWriter serverWriter = new BufferedWriter(outputStreamWriter);
+        this.serverWriter = new BufferedWriter(outputStreamWriter);
+
     }
+    
 
     /**
      * Authenticate with the server using the simple protocol.
