@@ -317,9 +317,20 @@ public class ChatterboxClient {
      * - If an IOException happens, treat it as disconnect:
      *   print a message to userOutput and exit.
      */
-    public void printIncomingChats() {
+    public void printIncomingChats() throws IOException{
         // Listen on serverReader
         // Write to userOutput, NOT System.out
+
+        // Create a string variable line
+        String line;
+
+        // Read from the server while there is a line to read
+        while ((line = serverReader.readLine()) != null) {
+            // convert bytes to text and write the line followed by a new line
+            userOutput.write((line + "\n").getBytes(StandardCharsets.UTF_8));
+            // Send line/output to the terminal 
+            userOutput.flush();
+        }
     }
 
     /**
