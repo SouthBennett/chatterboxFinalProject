@@ -158,7 +158,7 @@ public class ChatterboxClient {
          
         // making sure port number is in the range 1..65535
         if (port < 1 || port > 65535) {
-            throw new IllegalArgumentException("Bad port number");
+            throw new IllegalArgumentException("Port number must be between 1 and 65535");
         }       
 
         // return chatterbox object
