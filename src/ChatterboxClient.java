@@ -161,6 +161,7 @@ public class ChatterboxClient {
             throw new IllegalArgumentException("Bad port number");
         }       
 
+        // return chatterbox object
         return new ChatterboxOptions(host, port, username, password);
     }
 
@@ -182,7 +183,7 @@ public class ChatterboxClient {
         this.userOutput = userOutput;
 
         // TODO: copy options.getHost(), getPort(), getUsername(), getPassword() into fields
-        // Copies validated logic from the ChatterboxOptions method
+        // Copies host/port/username/password from the ChatterboxOptions method
         this.host = options.getHost();
         this.port = options.getPort();
         this.username = options.getUsername();
@@ -300,7 +301,14 @@ public class ChatterboxClient {
      * @throws IOException
      */
     public void streamChat() throws IOException {
-        throw new UnsupportedOperationException("Chat streaming not yet implemented. Implement streamChat() and remove this exception!");
+        // thread for incoming messages
+        Thread incomingMessages = new Thread(() -> printIncomingChats());
+        // thread for outgoing messages
+        Thread outgoingMessages = new Thread(() -> sendOutgoingChats());
+        // start incoming messages
+        incomingMessages.start();
+        // start outgoing messages
+        outgoingMessages.start();
     }
 
     /**
@@ -317,20 +325,28 @@ public class ChatterboxClient {
      * - If an IOException happens, treat it as disconnect:
      *   print a message to userOutput and exit.
      */
-    public void printIncomingChats() throws IOException{
+    public void printIncomingChats() {
         // Listen on serverReader
         // Write to userOutput, NOT System.out
 
-        // Create a string variable line
-        String line;
+        try {
+            // Create a string variable line
+            String line;
 
-        // Read from the server while there is a line to read
-        while ((line = serverReader.readLine()) != null) {
-            // convert bytes to text and write the line followed by a new line
-            userOutput.write((line + "\n").getBytes(StandardCharsets.UTF_8));
-            // Send line/output to the terminal 
-            userOutput.flush();
-        }
+            // Read from the server while there is a line to read
+            while ((line = serverReader.readLine()) != null) {
+                // convert bytes to text and write the line followed by a new line
+                userOutput.write((line + "\n").getBytes(StandardCharsets.UTF_8));
+                // Send line/output to the terminal 
+                userOutput.flush();
+            }
+        } catch (IOException e) {
+            // another try and catch just incase writing disconnected fails. tried withou try and catch but got errors
+            try {
+                userOutput.write(("Disconnected\n").getBytes(StandardCharsets.UTF_8));
+                userOutput.flush();
+            } catch (IOException ignored) {}
+        }    
     }
 
     /**
@@ -349,6 +365,23 @@ public class ChatterboxClient {
         // Use the userInput to read, NOT System.in directly
         // loop forever reading user input
         // write to serverOutput
+        while (true) {
+            // if user types a message (hasNextLine)
+            if (userInput.hasNextLine()) {
+                try {
+                    // assign that message to variable line
+                    String line = userInput.nextLine();
+                    // write that line (message) to the server writer
+                    serverWriter.write(line);
+                    // create new line so the server writer knows the message is finished
+                    serverWriter.newLine();
+                    // Flush to the server
+                    serverWriter.flush();
+                } catch (IOException e) {
+                    return;
+                }    
+            }
+        }
     }
 
     public String getHost() {
