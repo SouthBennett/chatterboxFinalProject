@@ -153,7 +153,7 @@ public class ChatterboxClient {
         try {
             port = Integer.parseInt(args[1]); 
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The port number has to be an integer");
+            throw new IllegalArgumentException("The port number has to be a number");
         }
          
         // making sure port number is in the range 1..65535
@@ -221,7 +221,7 @@ public class ChatterboxClient {
         // converts raw bytes to text
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8);
 
-        // converts raw bytes to text before sending to socket
+        // converts text to bytes before sending to socket
         OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
 
         // lets you read whole lines 
